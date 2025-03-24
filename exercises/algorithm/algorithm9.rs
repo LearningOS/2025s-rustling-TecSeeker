@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -20,6 +19,31 @@ impl<T> Heap<T>
 where
     T: Default,
 {
+    fn sift_up (&mut self, index: usize) {
+        let parent_index = self.parent_idx(index);
+        if parent_index == 0 {
+            return;
+        }
+        let parent_num = &self.items[parent_index];
+        let num = &self.items[index];
+        if (self.comparator)(num, parent_num) {
+            self.items.swap(parent_index, index);
+            self.sift_up(parent_index);
+        }
+    }
+
+    fn sift_down(&mut self, index: usize) {
+        let mut idx = index;
+        while self.children_present(idx) {
+            let smallest_child = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child], &self.items[idx]) {
+                self.items.swap(idx, smallest_child);
+                idx = smallest_child;
+            } else {
+                break;
+            }
+        }
+    }
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
@@ -37,7 +61,9 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.insert(self.count, value);
+        self.sift_up(self.count);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +83,20 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        if !self.children_present(idx) {
+            return 0;
+        }
+        let left = self.left_child_idx(idx);
+        if self.right_child_idx(idx) > self.count {
+            return left;
+        }
+        let right = self.right_child_idx(idx);
+
+        if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +122,19 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+
+        if self.count > 0 {
+            self.sift_down(1);
+        }
+
+        result
     }
 }
 
