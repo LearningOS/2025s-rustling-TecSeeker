@@ -59,5 +59,6 @@ mod tests {
         let mut num: Box<u32> = Box::new(3);
         num_sq(&mut num);
         assert_eq!(*num, 9);
+        
     }
 }
